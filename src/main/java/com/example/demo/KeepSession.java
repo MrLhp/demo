@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.google.common.cache.Cache;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
@@ -24,6 +25,8 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.*;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -87,13 +90,13 @@ public class KeepSession {
     public static void main(String[] args) {
 
         try {
-            downloadFile(validUrl+new Random().nextInt(),"d:\\yzm.png");
+            downloadFile(validUrl+new Random().nextInt(),"/home/pc-yx/yzm.png");
             Scanner scanner = new Scanner(System.in);
             System.out.println("请输入验证码:");
             String captcha = scanner.nextLine();
             JSONObject json = new JSONObject();
             json.put("username", "admin");
-            json.put("password", "ld@LD@20160708");
+            json.put("password", "Admin@ld@20190318");
             json.put("captcha",captcha);
             HttpPost post = new HttpPost(loginUrl);
             HttpEntity entity = new StringEntity(json.toString(),"text/html", "utf-8");
@@ -103,8 +106,19 @@ public class KeepSession {
             System.out.println(EntityUtils.toString(response.getEntity()));
             System.out.println("=================================================================");
 
-            Good.price();
-        } catch (IOException e) {
+            List<String> fileList = FileDataReader.getFileContentArrary("/home/pc-yx/liuhp.csv");
+
+            Thread [] threads = new Thread[fileList.size() / 50000 + 1];
+            for(int i = 0; i < threads.length; i++){
+                threads[i] = new Good(50000 * i, fileList.subList(i * 50000, fileList.size() < ((i + 1) * 50000)? fileList.size() : (i + 1) * 50000));
+                threads[i].start();
+            }
+
+            for(int i = 0; i < threads.length; i++){
+                threads[i].join();
+            }
+
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

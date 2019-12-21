@@ -1,6 +1,9 @@
 package com.example.demo;
 
 import com.google.common.cache.Cache;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
@@ -24,6 +27,7 @@ import org.json.JSONObject;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.*;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +94,7 @@ public class KeepSession {
     public static void main(String[] args) {
 
         try {
-            downloadFile(validUrl+new Random().nextInt(),"/home/pc-yx/yzm.png");
+            downloadFile(validUrl+new Random().nextInt(),"d://yzm.png");
             Scanner scanner = new Scanner(System.in);
             System.out.println("请输入验证码:");
             String captcha = scanner.nextLine();
@@ -106,19 +110,11 @@ public class KeepSession {
             System.out.println(EntityUtils.toString(response.getEntity()));
             System.out.println("=================================================================");
 
-            List<String> fileList = FileDataReader.getFileContentArrary("/home/pc-yx/liuhp.csv");
+            CinemaSupplementary cinemaSupplementary = new CinemaSupplementary();
+            post.setURI(URI.create(cinemaSupplementary.QUERY_URL));
+            cinemaSupplementary.supplementary(httpClient,httpClientContext,post);
 
-            Thread [] threads = new Thread[fileList.size() / 50000 + 1];
-            for(int i = 0; i < threads.length; i++){
-                threads[i] = new Good(50000 * i, fileList.subList(i * 50000, fileList.size() < ((i + 1) * 50000)? fileList.size() : (i + 1) * 50000));
-                threads[i].start();
-            }
-
-            for(int i = 0; i < threads.length; i++){
-                threads[i].join();
-            }
-
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

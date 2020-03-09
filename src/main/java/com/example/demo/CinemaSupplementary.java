@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -26,10 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CinemaSupplementary {
     private String pending="pending";
     private String waiting="waiting";
+    private String pass = "pass";
     public String QUERY_URL = "https://gjdyzjb.cn/boms/w/cinemaTicketSupplementApplications/s?page=REPLACE_PAGE&size=100&" +
-            "s_createdDateStrat=1546272000000&s_createdDateEnd=1577807999999&s_sessionDateTimeStrat=1546272000000&s_sessionDateTimeEnd=1577807999999" +
+            "s_createdDateStrat=1575561600000&s_createdDateEnd=1577375999999&s_sessionDateTimeStrat=1546272000000&s_sessionDateTimeEnd=1577375999999" +
             "&s_result=" +
-            waiting+"&sort=credentials,id,desc";
+            pass+"&sort=credentials,id,desc" +
+            "&s_timeLimit=abroad";//时限外
     private int pages = 0;
     private AtomicInteger count = new AtomicInteger(0);
     private long price = 0;
@@ -65,10 +68,13 @@ public class CinemaSupplementary {
 
                     JsonObject data = dataArray.get(i).getAsJsonObject();
                     CinemaSupplementBean cinemaSupplementBean = new Gson().fromJson(data, CinemaSupplementBean.class);
-                    String pass_url = "https://gjdyzjb.cn/boms/w/cinemaTicketSupplementApplications/approval/"+cinemaSupplementBean.getId()+"/administrator/pass";
-                    HttpGet httpGet = new HttpGet();
-                    httpGet.setURI(URI.create(pass_url));
-                    CloseableHttpResponse response = httpClient.execute(httpGet, httpClientContext);
+                    //审批通过
+                    //String url = "https://gjdyzjb.cn/boms/w/cinemaTicketSupplementApplications/approval/"+cinemaSupplementBean.getId()+"/administrator/pass";
+                    //延长时限
+                    String url = "https://gjdyzjb.cn/boms/w/cinemaTicketSupplementApplications/timeExpendBatch/"+cinemaSupplementBean.getId();
+                    HttpPut httpPut = new HttpPut();
+                    httpPut.setURI(URI.create(url));
+                    CloseableHttpResponse response = httpClient.execute(httpPut, httpClientContext);
                     writer.flush();
                     writer.write(cinemaSupplementBean.toString());
                     writer.write(System.getProperty("line.separator"));
